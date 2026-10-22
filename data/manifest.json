@@ -1,0 +1,21 @@
+{
+  "dataset_name": "ClaimSense synthetic starter dataset",
+  "dataset_version": "0.1.0",
+  "generated_on": "2026-10-22",
+  "synthetic_only": true,
+  "claims_total": 80,
+  "development_claims": 20,
+  "heldout_claims": 60,
+  "tariff_rows": 90,
+  "tariff_procedures": 30,
+  "city_tiers": [
+    "tier_1",
+    "tier_2",
+    "tier_3"
+  ],
+  "tariff_source_type": "synthetic_option_A",
+  "warning": "Not for real claims decisions or medical pricing.",
+  "official_source_pdfs_included": 6,
+  "policy_uin_observed_in_proposal_form": "NIAHLIP25044V022425",
+  "policy_document_status": "uploaded documents incorporated; exact version matching still requires review"
+}
