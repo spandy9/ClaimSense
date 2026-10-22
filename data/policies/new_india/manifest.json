@@ -1,0 +1,52 @@
+{
+  "insurer": "The New India Assurance Co. Ltd.",
+  "product": "Arogya Sanjeevani Policy",
+  "uin_observed_in_proposal_form": "NIAHLIP25044V022425",
+  "policy_wording_file": "policy_wording.pdf",
+  "documents": [
+    {
+      "original_filename": "POLICY CLAUSES Arogya Sanjeevani.pdf",
+      "stored_filename": "policy_wording.pdf",
+      "size_bytes": 1068767,
+      "sha256": "890ab4794c98a56eda8ef2749124e2114589cc00a5e596bed0392ea13667efce"
+    },
+    {
+      "original_filename": "Customer Information Sheet AROGYA SANJEEVANI POLICY.pdf",
+      "stored_filename": "customer_information_sheet.pdf",
+      "size_bytes": 238907,
+      "sha256": "ff4c3d125c311611f999a72023ba21ee53d2c31d1674e2c5d6cc4630276afe39"
+    },
+    {
+      "original_filename": "Prospectus Arogya Sanjeevani Policy.pdf",
+      "stored_filename": "prospectus.pdf",
+      "size_bytes": 968327,
+      "sha256": "21023fefa4ca9f4b74d0181c1610e421aa02c8c57528ff5b2180eb9bc1c5b525"
+    },
+    {
+      "original_filename": "Proposal form  New India Arogya sanjeevani policy.pdf",
+      "stored_filename": "proposal_form.pdf",
+      "size_bytes": 660997,
+      "sha256": "9d2c18f50fb2cf22068ef8843634346bd42981dd4f27a953dc04e6c7f48a1562"
+    },
+    {
+      "original_filename": "List of excluded items.pdf",
+      "stored_filename": "excluded_items.pdf",
+      "size_bytes": 427072,
+      "sha256": "41589141cc07700598f77428b40458cbc951e089aee35e6020225f207efcf832"
+    },
+    {
+      "original_filename": "Claim_Form.pdf",
+      "stored_filename": "claim_form.pdf",
+      "size_bytes": 159944,
+      "sha256": "45fff8eb7d20dc02b6501e5d27be2f6e011a95771a1907f2409c36b7ce86d976"
+    }
+  ],
+  "retrieved_on": "2026-10-22",
+  "status": "Source PDFs incorporated. Confirm that the wording, CIS, prospectus and exclusions list are mutually consistent and applicable to the policy version used in each synthetic case.",
+  "notes": [
+    "The proposal form carries UIN NIAHLIP25044V022425; this does not alone prove every downloaded document is the matching version.",
+    "Claim form and proposal form are operational forms, not policy wording.",
+    "The excluded-items PDF should be checked against the policy wording and any applicable annexure before converting each item into an automated rule.",
+    "Do not treat the prospectus or Customer Information Sheet as overriding the full policy wording where they differ."
+  ]
+}
