@@ -52,3 +52,7 @@ The following uploaded PDFs are included under `data/policies/new_india/`:
 - `claim_form.pdf` — Claim Form
 
 The uploaded proposal form shows UIN `NIAHLIP25044V022425`. Treat this as an observed identifier, not proof that every document is the same version. Before encoding rules, cross-check the UIN, effective/version dates and exact wording across the policy wording, CIS, prospectus and excluded-items list. Proposal and claim forms are workflow templates, not coverage contracts.
+
+The workflow diagram:
+
+![ClaimSense workflow diagram](./mermaid-diagram.png)
