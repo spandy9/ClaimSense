@@ -64,7 +64,7 @@ from the repository root:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt
-python3 src/extract_policy_clauses.py
+python3 src/ingestion/extract_policy_clauses.py
 ```
 
 The defaults read `data/policies/new_india/policy_wording.pdf` and write

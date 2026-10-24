@@ -325,7 +325,7 @@ def run_pipeline(pdf_path: Path, raw_output: Path, structured_output: Path) -> t
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pdf", type=Path, default=root / "data/policies/new_india/policy_wording.pdf")
     parser.add_argument("--raw-output", type=Path, default=root / "data/processed/extracted_clauses_raw.jsonl")

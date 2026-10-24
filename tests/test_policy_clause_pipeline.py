@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
 
-from src.extract_policy_clauses import extract_clauses, structure_clause, write_jsonl
+from src.ingestion.extract_policy_clauses import (
+    extract_clauses,
+    structure_clause,
+    write_jsonl,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
