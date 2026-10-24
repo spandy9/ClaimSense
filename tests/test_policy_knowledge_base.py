@@ -23,7 +23,7 @@ def test_split_text_respects_size_and_keeps_content():
 
 def test_policy_chunks_keep_provenance_and_exceptions():
     path = ROOT / "data/processed/policy_clauses_structured.jsonl"
-    records = clause_records(path, max_chars=1800, overlap=250)
+    records = clause_records(path, chunk_size=1800, overlap=250)
     assert records
     waiting = next(r for r in records if r["clause_number"] == "6.2.1")
     assert waiting["source"]["document"] == "policy_wording.pdf"
