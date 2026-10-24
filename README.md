@@ -167,7 +167,7 @@ python3 -m pytest
 
 Outputs:
 - `data/knowledge_base/policy_knowledge_base.jsonl`: retrieval-ready JSONL; one
-  chunk per line, with stable `chunk_id`, embedding-facing `text`, exact chunk
+  chunk per line, with stable `chunk_id`, embedding-facing `text`, whitespace-normalized chunk
   `source_text`, source document/hash/pages, clause hierarchy, parent context,
   proposed interpretation, conditions, exceptions, waiting-period fields,
   `verification_status`, and authority/retrieval warnings.
@@ -200,5 +200,6 @@ and human review.
 
 For a next step, embed the `text` field into Chroma/FAISS while storing all other
 fields as metadata; retrieve clause IDs and page references, then expose the
-verbatim `source_text` and policy page(s) to the reviewer. Do not pass held-out
+retrieved source chunk and policy page(s) to the reviewer. The structured source
+file retains the full extracted clause text for source comparison. Do not pass held-out
 gold worksheets into the retrieval corpus.
