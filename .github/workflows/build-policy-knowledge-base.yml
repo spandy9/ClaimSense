@@ -11,9 +11,12 @@ on:
       - "src/ingestion/extract_policy_clauses.py"
       - "tests/**"
       - "requirements*.txt"
-      - "README.md"
       - ".github/workflows/build-policy-knowledge-base.yml"
   workflow_dispatch:
+
+concurrency:
+  group: policy-knowledge-base-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
