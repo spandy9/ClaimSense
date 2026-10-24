@@ -3,13 +3,13 @@
   "built_by": "src/ingestion/build_policy_knowledge_base.py",
   "inputs": {
     "policy_wording": {
-      "path": "/home/runner/work/ClaimSense/ClaimSense/data/policies/new_india/policy_wording.pdf",
+      "path": "data/policies/new_india/policy_wording.pdf",
       "sha256": "890ab4794c98a56eda8ef2749124e2114589cc00a5e596bed0392ea13667efce",
       "page_count": 33,
       "authority_level": "primary_policy_wording"
     },
     "excluded_items": {
-      "path": "/home/runner/work/ClaimSense/ClaimSense/data/policies/new_india/excluded_items.pdf",
+      "path": "data/policies/new_india/excluded_items.pdf",
       "extracted_characters": 1774,
       "document": "excluded_items.pdf",
       "sha256": "41589141cc07700598f77428b40458cbc951e089aee35e6020225f207efcf832",
@@ -19,14 +19,14 @@
       "authority_note": "Supporting reference; verify consistency with the policy wording and applicable policy version before using an item as a rule."
     },
     "structured_clauses": {
-      "path": "/home/runner/work/ClaimSense/ClaimSense/data/processed/policy_clauses_structured.jsonl",
+      "path": "data/processed/policy_clauses_structured.jsonl",
       "sha256": "23b9e50b8145b17f0e95d6b930cd0b7323b304e42ebcddb0732181422b4f5695",
       "record_count": 163,
       "verification_status": "heuristic_draft_not_human_verified"
     }
   },
   "outputs": {
-    "jsonl_path": "/home/runner/work/ClaimSense/ClaimSense/data/knowledge_base/policy_knowledge_base.jsonl",
+    "jsonl_path": "data/knowledge_base/policy_knowledge_base.jsonl",
     "record_count": 167,
     "policy_clause_chunks": 165,
     "excluded_items_chunks": 2,
