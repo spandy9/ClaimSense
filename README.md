@@ -76,6 +76,75 @@ with `--pdf`, `--raw-output`, and `--structured-output`. Run the unit tests with
 python3 -m pytest
 ```
 
+### Output fields
+
+Both outputs are JSONL files: each line is one clause record. The raw file
+preserves extracted text and clause structure; the structured file adds
+heuristic labels and source-linked interpretation fields.
+
+#### `extracted_clauses_raw.jsonl`
+
+- `clause_id`: stable record identifier formed from the product name and clause
+  number.
+- `clause_number`: normalized clause number, including generated hierarchy for
+  numbered list items (for example, `6.2.1`).
+- `displayed_number`: number printed beside the item in the PDF. This can differ
+  from the normalized clause number for items whose hierarchy was inferred.
+- `parent_clause_number`: normalized parent clause number, or `null` for a
+  top-level clause.
+- `hierarchy`: the clause number split into its levels, as an array of strings.
+- `title`: extracted clause heading or item text following its number.
+- `page_number`: page where the clause starts (page numbering starts at 1).
+- `page_numbers`: ordered list of pages containing text assigned to the clause.
+- `source_document`: source PDF filename.
+- `source_sha256`: SHA-256 digest of the source PDF, to identify the exact file
+  used for extraction.
+- `section_context`: nearby heading context retained for numbered list items,
+  such as a waiting-period heading; it contains `text` and `page_number`, or is
+  `null` when no such context was captured.
+- `source_text`: combined extracted text assigned to this clause.
+- `source_spans`: ordered text fragments with their `page_number`, preserving
+  the page associated with each extracted line.
+
+#### `policy_clauses_structured.jsonl`
+
+- `record_id`: same clause identifier as the raw record's `clause_id`.
+- `clause_number`, `displayed_number`, `parent_clause_number`, `hierarchy`, and
+  `title`: the corresponding clause identification and hierarchy fields from
+  the raw record.
+- `source`: source metadata grouped together: `document` (PDF filename),
+  `sha256` (source PDF digest), `page_number` (start page), `page_numbers`
+  (pages containing the clause), `insurer`, `product`, and
+  `uin_observed_in_policy_pdf` (the UIN observed in that PDF, not proof that
+  other documents share the same version).
+- `source_text`: extracted clause text, retained so the structured record can
+  be checked against its source.
+- `proposed_interpretation`: heuristic draft fields:
+  - `topic`: broad subject label, such as `waiting_period`, `exclusion`, or
+    `room_rent_limit`.
+  - `rule_type`: broad category for the topic, such as
+    `eligibility_or_timing` or `benefit_limit`.
+  - `applicability_conditions`: source-text matches that may describe when a
+    clause applies.
+  - `exceptions`: source-text matches that may describe exceptions.
+  - `parent_context`: parent clause number, its source text, and page numbers,
+    or `null` if no parent record is available.
+  - `waiting_period`: present for clauses classified as waiting periods. It
+    includes `duration_text` found in the clause or section heading,
+    `parent_duration_mentions` found in the parent clause,
+    `period_start_text` (currently `null`), `applies_to_text` and
+    `raw_waiting_period_spans` (matched waiting-period text),
+    `section_context_text` and `section_context_page_number` (captured nearby
+    heading, when available), and an `interpretation_note` describing the
+    limits of the extraction.
+  - `numeric_threshold`: currently `null`; the pipeline deliberately does not
+    infer a single numeric threshold from the extracted phrases.
+  - `interpretation_method`: identifies the approach as
+    `keyword_and_span_heuristics`.
+  - `review_flags`: reminders to verify the wording and policy version/schedule.
+- `verification_status`: currently `not_human_verified`; the structured output
+  is a draft for review, not an authoritative coverage determination.
+
 The structured records are proposed interpretations produced by keyword and
 source-span heuristics. Waiting-period duration, applicability, start point and
 exceptions remain separate text fields; the pipeline does not turn them into a
