@@ -92,7 +92,7 @@ def split_text(text: str, max_chars: int, overlap: int) -> list[str]:
                           text.rfind(" ", floor, end)]
             boundary = max(candidates)
             if boundary > start:
-                end = boundary + (1 if text[boundary:boundary + 1] in "\n " else 2)
+                end = min(end, boundary + (1 if text[boundary:boundary + 1] in "\n " else 2))
         chunk = text[start:end].strip()
         if chunk:
             chunks.append(chunk)
