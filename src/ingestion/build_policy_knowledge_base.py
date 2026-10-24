@@ -124,10 +124,24 @@ def clause_records(path: Path, chunk_size: int, overlap: int) -> list[dict[str, 
         waiting = interpretation.get("waiting_period")
         for idx, piece in enumerate(pieces, start=1):
             chunk_id = f"clause::{rid}::part-{idx:03d}"
+            parent_source_text = str(parent.get("source_text") or "").strip()
+            parent_heading = parent_source_text.splitlines()[0].strip() if parent_source_text else ""
+            # Repeating a compact section context makes terse list items
+            # retrievable (e.g., a disease name under a waiting-period section).
+            # The exact chunk text remains separately available as source_text.
+            context_lines = [
+                f"Policy wording clause {record.get('clause_number')}: {record.get('title') or ''}".strip(),
+            ]
+            if parent_heading:
+                context_lines.append(f"Parent section {parent.get('clause_number') or record.get('parent_clause_number')}: {parent_heading}")
+            if parent_source_text and str(interpretation.get("topic") or "") == "waiting_period":
+                context_lines.append("Waiting-period section context: " + parent_source_text[:1400])
+            retrieval_text = "\\n".join(context_lines) + "\\nClause source text:\\n" + piece
             kb.append({
                 "chunk_id": chunk_id,
                 "record_type": "policy_clause",
-                "text": piece,
+                "text": retrieval_text,
+                "source_text": piece,
                 "title": record.get("title"),
                 "clause_id": rid,
                 "clause_number": record.get("clause_number"),
@@ -209,7 +223,14 @@ def exclusion_page_records(pdf_path: Path, chunk_size: int, overlap: int) -> tup
                     "Cross-check item definition, applicability, exceptions and policy version."
                 ),
             })
+    extracted_characters = sum(len((page.extract_text() or "").strip()) for page in reader.pages)
+    if extracted_characters < 80:
+        raise ValueError(
+            f"Very little text could be extracted from {pdf_path.name} "
+            f"({extracted_characters} characters); OCR or layout-specific extraction is likely needed."
+        )
     metadata = {
+        "extracted_characters": extracted_characters,
         "document": pdf_path.name,
         "sha256": digest,
         "page_count": len(reader.pages),
