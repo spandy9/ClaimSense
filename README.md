@@ -56,3 +56,29 @@ The uploaded proposal form shows UIN `NIAHLIP25044V022425`. Treat this as an obs
 The workflow diagram:
 
 ![ClaimSense workflow diagram](./mermaid-diagram.png)
+
+## Extract and structure policy clauses
+
+Use Python 3.9 or newer. Install the PDF reader dependency and run the pipeline
+from the repository root:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+python3 src/extract_policy_clauses.py
+```
+
+The defaults read `data/policies/new_india/policy_wording.pdf` and write
+`data/processed/extracted_clauses_raw.jsonl` and
+`data/processed/policy_clauses_structured.jsonl`. Alternate paths can be supplied
+with `--pdf`, `--raw-output`, and `--structured-output`. Run the unit tests with:
+
+```bash
+python3 -m pytest
+```
+
+The structured records are proposed interpretations produced by keyword and
+source-span heuristics. Waiting-period duration, applicability, start point and
+exceptions remain separate text fields; the pipeline does not turn them into a
+single threshold. Every record is marked `not_human_verified`. A qualified
+reviewer must compare the extracted text, page references, policy version,
+schedule and endorsements before any clause is used for claim decisions.
