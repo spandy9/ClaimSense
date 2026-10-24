@@ -136,7 +136,7 @@ def clause_records(path: Path, chunk_size: int, overlap: int) -> list[dict[str, 
                 context_lines.append(f"Parent section {parent.get('clause_number') or record.get('parent_clause_number')}: {parent_heading}")
             if parent_source_text and str(interpretation.get("topic") or "") == "waiting_period":
                 context_lines.append("Waiting-period section context: " + parent_source_text[:1400])
-            retrieval_text = "\\n".join(context_lines) + "\\nClause source text:\\n" + piece
+            retrieval_text = "\n".join(context_lines) + "\nClause source text:\n" + piece
             kb.append({
                 "chunk_id": chunk_id,
                 "record_type": "policy_clause",
