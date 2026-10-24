@@ -27,6 +27,16 @@ DEFAULT_CHUNK_SIZE = 1800
 DEFAULT_OVERLAP = 250
 
 
+def portable_path(path: Path) -> str:
+    """Return a repository-relative path when the input lives inside the repo."""
+    resolved = Path(path).resolve()
+    project_root = Path(__file__).resolve().parents[2]
+    try:
+        return resolved.relative_to(project_root).as_posix()
+    except ValueError:
+        return Path(path).as_posix()
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -284,13 +294,13 @@ def build_knowledge_base(
         "built_by": "src/ingestion/build_policy_knowledge_base.py",
         "inputs": {
             "policy_wording": {
-                "path": str(policy_pdf),
+                "path": portable_path(policy_pdf),
                 "sha256": expected_policy_hash,
                 "page_count": len(policy_reader.pages),
                 "authority_level": "primary_policy_wording",
             },
             "excluded_items": {
-                "path": str(exclusions_pdf),
+                "path": portable_path(exclusions_pdf),
                 **exclusion_meta,
                 "authority_note": (
                     "Supporting reference; verify consistency with the policy wording and "
@@ -298,14 +308,14 @@ def build_knowledge_base(
                 ),
             },
             "structured_clauses": {
-                "path": str(structured_jsonl),
+                "path": portable_path(structured_jsonl),
                 "sha256": sha256_file(structured_jsonl),
                 "record_count": len(structured),
                 "verification_status": "heuristic_draft_not_human_verified",
             },
         },
         "outputs": {
-            "jsonl_path": str(output_jsonl),
+            "jsonl_path": portable_path(output_jsonl),
             "record_count": written,
             "policy_clause_chunks": len(policy_records),
             "excluded_items_chunks": len(exclusion_records),
