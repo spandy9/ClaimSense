@@ -151,3 +151,54 @@ exceptions remain separate text fields; the pipeline does not turn them into a
 single threshold. Every record is marked `not_human_verified`. A qualified
 reviewer must compare the extracted text, page references, policy version,
 schedule and endorsements before any clause is used for claim decisions.
+
+
+## Build the policy knowledge base
+
+The extraction script writes clause-level draft records to
+`data/processed/policy_clauses_structured.jsonl`. Build the retrieval corpus from
+that file plus the original policy wording and excluded-items PDF:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+python3 src/ingestion/build_policy_knowledge_base.py
+python3 -m pytest
+```
+
+Outputs:
+- `data/knowledge_base/policy_knowledge_base.jsonl`: retrieval-ready JSONL; one
+  chunk per line, with stable `chunk_id`, embedding-facing `text`, exact chunk
+  `source_text`, source document/hash/pages, clause hierarchy, parent context,
+  proposed interpretation, conditions, exceptions, waiting-period fields,
+  `verification_status`, and authority/retrieval warnings.
+- `data/knowledge_base/manifest.json`: input hashes/page counts, chunk counts,
+  chunking settings, warnings and limitations.
+
+The builder checks that the SHA-256 in the structured clause records matches
+`policy_wording.pdf`; if it does not, re-run clause extraction from the checked-in
+PDF before building. Default chunking is 1,800 characters with 250 characters of
+overlap, using paragraph/sentence/whitespace boundaries. Short numbered items
+include parent-section context in the embedding-facing `text` so that retrieval
+does not lose the waiting-period/exclusion context; `source_text` remains the
+text of the individual source chunk.
+
+The excluded-items PDF is indexed as a separate `excluded_items_reference`
+record type and marked as a supporting reference, not as an overriding policy
+contract. A page with no extracted text is flagged; very low overall extraction
+volume stops the build and requires OCR/layout review. Check all page text and
+document versions against the original PDFs before use.
+
+**Important:** This is a provenance-preserving retrieval corpus, not an embedding
+index and not a verified policy rules engine. Every clause remains
+`not_human_verified`. The rule labels, conditions, and exceptions are heuristic
+suggestions. In particular, waiting periods, ported coverage, accident exceptions,
+enhancement of sum insured, and interactions with pre-existing-disease waiting
+periods must retain their source text and be reviewed together. Do not infer a
+single threshold or approve/deny a claim from retrieval text alone. The final claim
+decision must also consider the applicable schedule, endorsements, policy dates,
+and human review.
+
+For a next step, embed the `text` field into Chroma/FAISS while storing all other
+fields as metadata; retrieve clause IDs and page references, then expose the
+verbatim `source_text` and policy page(s) to the reviewer. Do not pass held-out
+gold worksheets into the retrieval corpus.
