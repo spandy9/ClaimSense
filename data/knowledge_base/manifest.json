@@ -1,0 +1,55 @@
+{
+  "knowledge_base_version": "1.0.0",
+  "built_by": "src/ingestion/build_policy_knowledge_base.py",
+  "inputs": {
+    "policy_wording": {
+      "path": "data/policies/new_india/policy_wording.pdf",
+      "sha256": "890ab4794c98a56eda8ef2749124e2114589cc00a5e596bed0392ea13667efce",
+      "page_count": 33,
+      "authority_level": "primary_policy_wording"
+    },
+    "excluded_items": {
+      "path": "data/policies/new_india/excluded_items.pdf",
+      "sha256": "41589141cc07700598f77428b40458cbc951e089aee35e6020225f207efcf832",
+      "page_count": 2,
+      "extracted_characters_by_page": [
+        1269,
+        509
+      ],
+      "authority_level": "supporting_exclusions_reference",
+      "authority_note": "Supporting reference; verify consistency with policy wording and applicable policy version."
+    },
+    "structured_clauses": {
+      "path": "data/processed/policy_clauses_structured.jsonl",
+      "git_blob_sha": "c0098861eebd6d30730e8be077a051599564e553",
+      "record_count": 163,
+      "verification_status": "heuristic_draft_not_human_verified"
+    }
+  },
+  "outputs": {
+    "jsonl_path": "data/knowledge_base/policy_knowledge_base.jsonl",
+    "record_count": 167,
+    "policy_clause_chunks": 165,
+    "excluded_items_chunks": 2,
+    "unique_chunk_ids": 167
+  },
+  "chunking": {
+    "max_chars": 1800,
+    "overlap_chars": 250,
+    "split_strategy": "paragraph_sentence_whitespace_boundaries",
+    "embedding_text_includes_compact_parent_context": true
+  },
+  "safety_and_provenance": [
+    "Source text is retained separately from proposed interpretation.",
+    "All chunks require human verification before use as authoritative adjudication rules.",
+    "Waiting-period applicability, conditions and exceptions are retained as source-linked text.",
+    "No numeric threshold is inferred by this builder.",
+    "The excluded-items PDF is not treated as overriding policy wording.",
+    "For final decisions, check the policy schedule, endorsements, coverage dates and version."
+  ],
+  "limitations": [
+    "PDF extraction may omit text embedded in images or complex layouts; inspect all pages.",
+    "Clause-level heuristics may mislabel topics, conditions or exceptions.",
+    "This is a retrieval corpus, not an embedding index or verified rules engine."
+  ]
+}
