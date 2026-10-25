@@ -6,7 +6,6 @@ on:
     paths:
       - "data/policies/new_india/policy_wording.pdf"
       - "data/policies/new_india/excluded_items.pdf"
-      - "data/processed/policy_clauses_structured.jsonl"
       - "src/ingestion/build_policy_knowledge_base.py"
       - "src/ingestion/extract_policy_clauses.py"
       - "tests/**"
