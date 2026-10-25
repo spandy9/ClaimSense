@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Build a provenance-preserving retrieval knowledge base from policy clauses and exclusions.
+"""Build the retrieval knowledge base directly from the two source PDFs.
+
+The numbered-clause parser runs in memory against policy_wording.pdf. The
+excluded-items PDF is extracted independently. The structured JSONL produced by
+the separate clause-review pipeline is not an input to this builder.
 
 This script does not make coverage decisions or verify heuristic interpretations.
-It produces JSONL chunks suitable for later embedding/indexing into Chroma, FAISS,
-or another vector store. Source text and machine-proposed interpretations remain
-separate fields.
+It produces provenance-preserving JSONL chunks suitable for later embedding and
+indexing into Chroma, FAISS, or another vector store.
 """
 from __future__ import annotations
 
@@ -12,15 +15,26 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
 from pypdf import PdfReader
 
+# Resolve the shared extractor whether this file is run as a script or imported.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.ingestion.extract_policy_clauses import (
+    PARSER_VERSION as CLAUSE_PARSER_VERSION,
+    extract_clauses,
+    structure_clause,
+)
+
 PARSER_VERSION = "1.0.0"
 DEFAULT_POLICY = "data/policies/new_india/policy_wording.pdf"
 DEFAULT_EXCLUSIONS = "data/policies/new_india/excluded_items.pdf"
-DEFAULT_STRUCTURED = "data/processed/policy_clauses_structured.jsonl"
 DEFAULT_OUTPUT = "data/knowledge_base/policy_knowledge_base.jsonl"
 DEFAULT_MANIFEST = "data/knowledge_base/manifest.json"
 DEFAULT_CHUNK_SIZE = 1800
@@ -43,22 +57,6 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
-
-
-def read_jsonl(path: Path) -> list[dict[str, Any]]:
-    records = []
-    with path.open("r", encoding="utf-8") as stream:
-        for line_no, line in enumerate(stream, start=1):
-            if not line.strip():
-                continue
-            try:
-                record = json.loads(line)
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"{path}:{line_no}: invalid JSONL: {exc}") from exc
-            if not isinstance(record, dict):
-                raise ValueError(f"{path}:{line_no}: expected a JSON object")
-            records.append(record)
-    return records
 
 
 def write_jsonl(path: Path, records: Iterable[dict[str, Any]]) -> int:
@@ -112,8 +110,15 @@ def split_text(text: str, max_chars: int, overlap: int) -> list[str]:
     return chunks
 
 
-def clause_records(path: Path, chunk_size: int, overlap: int) -> list[dict[str, Any]]:
-    records = read_jsonl(path)
+def clause_records(policy_pdf: Path, chunk_size: int, overlap: int) -> list[dict[str, Any]]:
+    """Extract and structure clauses directly from the source policy PDF.
+
+    Raw and structured records are built in memory. The separate structured
+    JSONL remains available for review, but is not an input to this builder.
+    """
+    raw_records, source_metadata = extract_clauses(policy_pdf)
+    raw_by_number = {record["clause_number"]: record for record in raw_records}
+    records = [structure_clause(record, source_metadata, raw_by_number) for record in raw_records]
     kb: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for record in records:
@@ -253,32 +258,29 @@ def exclusion_page_records(pdf_path: Path, chunk_size: int, overlap: int) -> tup
 def build_knowledge_base(
     policy_pdf: Path,
     exclusions_pdf: Path,
-    structured_jsonl: Path,
     output_jsonl: Path,
     manifest_path: Path,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     overlap: int = DEFAULT_OVERLAP,
 ) -> dict[str, Any]:
-    for path in (policy_pdf, exclusions_pdf, structured_jsonl):
+    for path in (policy_pdf, exclusions_pdf):
         if not path.is_file():
-            raise FileNotFoundError(f"Required input not found: {path}")
+            raise FileNotFoundError(f"Required source PDF not found: {path}")
 
-    policy_records = clause_records(structured_jsonl, chunk_size, overlap)
+    policy_records = clause_records(policy_pdf, chunk_size, overlap)
     exclusion_records, exclusion_meta = exclusion_page_records(exclusions_pdf, chunk_size, overlap)
 
-    # Refuse to build a potentially misleading KB if the structured data is not
-    # tied to the actual PDF by SHA-256. This is an explicit version-integrity check.
+    # Confirm the in-memory extractor is tied to the exact source PDF.
     expected_policy_hash = sha256_file(policy_pdf)
-    structured = read_jsonl(structured_jsonl)
-    mismatches = []
-    for record in structured:
-        actual = (record.get("source") or {}).get("sha256")
-        if actual and actual != expected_policy_hash:
-            mismatches.append({"record_id": record.get("record_id"), "structured_sha256": actual})
+    mismatches = [
+        record.get("clause_id")
+        for record in policy_records
+        if (record.get("source") or {}).get("sha256") != expected_policy_hash
+    ]
     if mismatches:
         raise ValueError(
-            f"Structured clause hash does not match policy_wording.pdf for {len(mismatches)} "
-            "records. Re-run extraction from the checked-in PDF before building the KB."
+            f"In-memory clause extraction hash differs from policy_wording.pdf "
+            f"for {len(mismatches)} chunks."
         )
 
     combined = policy_records + exclusion_records
@@ -307,12 +309,15 @@ def build_knowledge_base(
                     "applicable policy version before using an item as a rule."
                 ),
             },
-            "structured_clauses": {
-                "path": portable_path(structured_jsonl),
-                "sha256": sha256_file(structured_jsonl),
-                "record_count": len(structured),
-                "verification_status": "heuristic_draft_not_human_verified",
-            },
+        },
+        "clause_extraction": {
+            "source": "policy_wording.pdf",
+            "method": "pypdf extraction and in-memory numbered-clause heuristics",
+            "parser": "src/ingestion/extract_policy_clauses.py",
+            "parser_version": CLAUSE_PARSER_VERSION,
+            "derived_record_count": len({record.get("clause_id") for record in policy_records}),
+            "verification_status": "heuristic_draft_not_human_verified",
+            "intermediate_jsonl_used_as_input": False,
         },
         "outputs": {
             "jsonl_path": portable_path(output_jsonl),
@@ -347,13 +352,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--policy-pdf", type=Path, default=root / DEFAULT_POLICY)
     parser.add_argument("--excluded-items-pdf", type=Path, default=root / DEFAULT_EXCLUSIONS)
-    parser.add_argument("--structured-jsonl", type=Path, default=root / DEFAULT_STRUCTURED)
     parser.add_argument("--output", type=Path, default=root / DEFAULT_OUTPUT)
     parser.add_argument("--manifest", type=Path, default=root / DEFAULT_MANIFEST)
     parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE)
     parser.add_argument("--overlap", type=int, default=DEFAULT_OVERLAP)
     args = parser.parse_args()
-    manifest = build_knowledge_base(args.policy_pdf, args.excluded_items_pdf, args.structured_jsonl,
+    manifest = build_knowledge_base(args.policy_pdf, args.excluded_items_pdf,
                                     args.output, args.manifest, args.chunk_size, args.overlap)
     print(json.dumps(manifest["outputs"], indent=2))
     print("WARNING: this is a retrieval corpus, not verified policy logic or a settlement authority.")
