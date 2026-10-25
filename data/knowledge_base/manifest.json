@@ -17,13 +17,16 @@
       "record_type": "excluded_items_reference",
       "authority_level": "supporting_exclusions_reference",
       "authority_note": "Supporting reference; verify consistency with the policy wording and applicable policy version before using an item as a rule."
-    },
-    "structured_clauses": {
-      "path": "data/processed/policy_clauses_structured.jsonl",
-      "sha256": "23b9e50b8145b17f0e95d6b930cd0b7323b304e42ebcddb0732181422b4f5695",
-      "record_count": 163,
-      "verification_status": "heuristic_draft_not_human_verified"
     }
+  },
+  "clause_extraction": {
+    "source": "policy_wording.pdf",
+    "method": "pypdf extraction and in-memory numbered-clause heuristics",
+    "parser": "src/ingestion/extract_policy_clauses.py",
+    "parser_version": "1.0.0",
+    "derived_record_count": 163,
+    "verification_status": "heuristic_draft_not_human_verified",
+    "intermediate_jsonl_used_as_input": false
   },
   "outputs": {
     "jsonl_path": "data/knowledge_base/policy_knowledge_base.jsonl",
