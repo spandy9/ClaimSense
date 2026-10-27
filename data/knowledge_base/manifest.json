@@ -1,0 +1,56 @@
+{
+  "knowledge_base_version": "1.0.0",
+  "built_by": "src/ingestion/build_policy_knowledge_base.py",
+  "inputs": {
+    "policy_wording": {
+      "path": "data/policies/new_india/policy_wording.pdf",
+      "sha256": "890ab4794c98a56eda8ef2749124e2114589cc00a5e596bed0392ea13667efce",
+      "page_count": 33,
+      "authority_level": "primary_policy_wording"
+    },
+    "excluded_items": {
+      "path": "data/policies/new_india/excluded_items.pdf",
+      "extracted_characters": 1774,
+      "document": "excluded_items.pdf",
+      "sha256": "41589141cc07700598f77428b40458cbc951e089aee35e6020225f207efcf832",
+      "page_count": 2,
+      "record_type": "excluded_items_reference",
+      "authority_level": "supporting_exclusions_reference",
+      "authority_note": "Supporting reference; verify consistency with the policy wording and applicable policy version before using an item as a rule."
+    }
+  },
+  "clause_extraction": {
+    "source": "policy_wording.pdf",
+    "method": "pypdf extraction and in-memory numbered-clause heuristics",
+    "parser": "src/ingestion/extract_policy_clauses.py",
+    "parser_version": "1.0.0",
+    "derived_record_count": 163,
+    "verification_status": "heuristic_draft_not_human_verified",
+    "intermediate_jsonl_used_as_input": false
+  },
+  "outputs": {
+    "jsonl_path": "data/knowledge_base/policy_knowledge_base.jsonl",
+    "record_count": 167,
+    "policy_clause_chunks": 165,
+    "excluded_items_chunks": 2,
+    "unique_chunk_ids": 167
+  },
+  "chunking": {
+    "max_chars": 1800,
+    "overlap_chars": 250,
+    "split_strategy": "paragraph_sentence_whitespace_boundaries"
+  },
+  "safety_and_provenance": [
+    "Source text is retained separately from proposed interpretation.",
+    "All chunks require human verification before use as authoritative adjudication rules.",
+    "Waiting-period applicability, conditions and exceptions are retained as source-linked text.",
+    "No numeric threshold is inferred by this builder.",
+    "The excluded-items PDF is not treated as overriding policy wording.",
+    "For final decisions, check the policy schedule, endorsements, coverage dates and version."
+  ],
+  "limitations": [
+    "PDF text extraction may omit text embedded in images or complex layouts; inspect empty pages.",
+    "Clause-level heuristics may mislabel topics/conditions/exceptions and are not proof of meaning.",
+    "This output is a retrieval corpus, not an embedding index; embeddings and vector-store schema are downstream steps."
+  ]
+}
